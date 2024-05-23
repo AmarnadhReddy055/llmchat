@@ -1,10 +1,10 @@
-from flask import Flask, request, jsonify
+import streamlit as st
 from huggingface_hub import login
 from transformers import AutoTokenizer, pipeline
 import torch
 
 # Function to generate text using Llama model
-def generate_text(prompt):
+def generate_text(prompt, llama_pipeline, tokenizer):
     sequences = llama_pipeline(
         prompt,
         do_sample=True,
@@ -15,9 +15,6 @@ def generate_text(prompt):
     )
     generated_text = sequences[0]['generated_text']
     return generated_text
-
-# Flask app initialization
-app = Flask(__name__)
 
 # Login to Hugging Face
 login(token='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')
@@ -33,18 +30,17 @@ llama_pipeline = pipeline(
     device_map="auto",
 )
 
-# Route to handle POST requests for text generation
-@app.route('/generate', methods=['POST'])
-def generate():
-    data = request.json
-    prompt = data.get('prompt', '')
-    
-    if not prompt:
-        return jsonify({'error': 'Prompt is required'}), 400
-    
-    generated_text = generate_text(prompt)
-    return jsonify({'generated_text': generated_text})
+# Streamlit app initialization
+st.title("Text Generation with Llama Model")
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
- 
+# Input prompt from the user
+prompt = st.text_area("Enter your prompt here:")
+
+# Generate text when the user clicks the button
+if st.button("Generate Text"):
+    if not prompt:
+        st.error("Prompt is required")
+    else:
+        generated_text = generate_text(prompt, llama_pipeline, tokenizer)
+        st.write("Generated Text:")
+        st.write(generated_text)
