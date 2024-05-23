@@ -2,7 +2,7 @@ import streamlit as st
 from huggingface_hub import login
 from transformers import AutoTokenizer, pipeline
 import torch
-
+import accelerate
 # Function to generate text using Llama model
 def generate_text(prompt, llama_pipeline, tokenizer):
     sequences = llama_pipeline(
